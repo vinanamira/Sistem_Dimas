@@ -1,11 +1,7 @@
 <?php
-// login.php — halaman login utama untuk semua role
-// Letakkan file ini di root folder Sistem_Dimas/
-// Akses: http://localhost/Sistem_Dimas/login.php
 
 require_once 'backend/helpers/session.php';
 
-// Jika sudah login, redirect ke halaman yang sesuai
 if (isLoggedIn()) {
     $user = getLoggedUser();
     switch ($user['role']) {
