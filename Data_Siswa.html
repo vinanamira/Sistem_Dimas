@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dashboard Pembayaran</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-50 font-sans">
+
+<div class="min-h-screen flex flex-col md:flex-row">
+
+  <!-- Sidebar -->
+  <aside class="w-64 bg-gradient-to-b from-blue-400 to-blue-600 text-white p-6 hidden md:block">
+    <img src="asset/Logo SMK.jpg" class="h-28 mx-auto mb-8 rounded-xl bg-white p-2">
+
+    <p class="text-center font-bold">Dimas</p>
+    <p class="text-center text-sm mb-6">Bendahara</p>
+
+    <nav class="space-y-3 text-sm">
+      <a href="index_admin.html" class="block hover:bg-white/20 p-3 rounded-lg">📊 Dashboard</a>
+      <a href="Data_Siswa.html" class="block bg-white/20 p-3 rounded-lg">👨‍🎓 Data Siswa</a>
+      <a href="Tagihan_Bulanan.html" class="block hover:bg-white/20 p-3 rounded-lg">💳 Tagihan Bulanan</a>
+      <a href="Pembayaran_Masuk.html" class="block hover:bg-white/20 p-3 rounded-lg">⬆️ Pembayaran Masuk</a>
+      <a href="Laporan_Pengeluaran.html" class="block hover:bg-white/20 p-3 rounded-lg">📉 Laporan Pengeluaran</a>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="flex-1 p-4 md:p-8">
+    <!-- Header Dashboard -->
+    <div class="flex justify-between items-center mb-8">
+      <h2 class="text-xl font-bold">Data Siswa</h2>
+      <button class="bg-red-500 text-white px-3 py-1 rounded text-sm">Logout</button>
+    </div>
+
+    <!-- Header -->
+  <div class="mt-4 flex justify-between">
+    <button class="px-8 py-3 bg-gradient-to-r from-blue-600 to-green-500 text-white rounded-full shadow-lg hover:scale-105 transition">
+      + Tambah Siswa
+    </button>
+  </div>
+
+  <!-- Search -->
+  <div class="relative w-full md:w-64 mt-6 mb-6">
+    <input type="text" placeholder="Cari nama siswa..."
+      class="w-full px-4 py-2 rounded-lg border focus:outline-none focus:ring focus:ring-blue-300">
+    <span class="absolute right-3 top-2 text-gray-400">🔍</span>
+  </div>
+
+   <!-- Table -->
+    <div class="overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-100 text-gray-700 font-semibold">
+          <tr>
+            <th class="px-6 py-3 text-left">Nama</th>
+            <th class="px-6 py-3 text-left">Kelas</th>
+            <th class="px-6 py-3 text-left">NIS</th>
+            <th class="px-6 py-3 text-left">Email</th>
+            <th class="px-6 py-3"></th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200 text-gray-800">
+          <!-- Baris data siswa -->
+          <tr>
+            <td class="px-6 py-4">Akmal Wijaya</td>
+            <td class="px-6 py-4">10 TKJ</td>
+            <td class="px-6 py-4">103550</td>
+            <td class="px-6 py-4">akmal@email.com</td>
+            <td class="px-6 py-4 text-right">
+              <button class="text-sm border border-blue-300 px-3 py-1 rounded hover:bg-gray-100">Edit</button>
+            </td>
+          </tr>
+          <tr>
+            <td class="px-6 py-4">Dian Pratama</td>
+            <td class="px-6 py-4">11 TKJ</td>
+            <td class="px-6 py-4">115220</td>
+            <td class="px-6 py-4">dian@email.ac.id</td>
+            <td class="px-6 py-4 text-right">
+              <button class="text-sm border border-blue-300 px-3 py-1 rounded hover:bg-gray-100">Edit</button>
+            </td>
+          </tr>
+          <tr>
+            <td class="px-6 py-4">Rina Kurniawati</td>
+            <td class="px-6 py-4">12 TKJ</td>
+            <td class="px-6 py-4">128450</td>
+            <td class="px-6 py-4">rina.kurniawati.com</td>
+            <td class="px-6 py-4 text-right">
+              <button class="text-sm border border-blue-300 px-3 py-1 rounded hover:bg-gray-100">Edit</button>
+            </td>
+          </tr>
+          <tr>
+            <td class="px-6 py-4">Budiman Asri</td>
+            <td class="px-6 py-4">10 TKJ</td>
+            <td class="px-6 py-4">198700</td>
+            <td class="px-6 py-4">budiman.asri.com</td>
+            <td class="px-6 py-4 text-right">
+              <button class="text-sm border border-blue-300 px-3 py-1 rounded hover:bg-gray-100">Edit</button>
+            </td>
+          </tr>
+          <tr>
+            <td class="px-6 py-4">Anita Setiawan</td>
+            <td class="px-6 py-4">11 TSM</td>
+            <td class="px-6 py-4">151980</td>
+            <td class="px-6 py-4">anita@email.com</td>
+            <td class="px-6 py-4 text-right">
+              <button class="text-sm border border-blue-300 px-3 py-1 rounded hover:bg-gray-100">Edit</button>
+            </td>
+          </tr>
+          <tr>
+            <td class="px-6 py-4">Adi Putra</td>
+            <td class="px-6 py-4">10 TSM</td>
+            <td class="px-6 py-4">120980</td>
+            <td class="px-6 py-4">adi.putra@email.com</td>
+            <td class="px-6 py-4 text-right">
+              <button class="text-sm border border-blue-300 px-3 py-1 rounded hover:bg-gray-100">Edit</button>
+            </td>
+          </tr>
+          <tr>
+            <td class="px-6 py-4">Hani Abdullah</td>
+            <td class="px-6 py-4">11 TSM</td>
+            <td class="px-6 py-4">123470</td>
+            <td class="px-6 py-4">haniabdullah.com</td>
+            <td class="px-6 py-4 text-right">
+              <button class="text-sm border border-blue-300 px-3 py-1 rounded hover:bg-gray-100">Edit</button>
+            </td>
+          </tr>
+          <tr>
+            <td class="px-6 py-4">Siti Wulandari</td>
+            <td class="px-6 py-4">12 TSM</td>
+            <td class="px-6 py-4">131070</td>
+            <td class="px-6 py-4">sitiwulandari.com</td>
+            <td class="px-6 py-4 text-right">
+              <button class="text-sm border border-blue-300 px-3 py-1 rounded hover:bg-gray-100">Edit</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+
+  </main>
+</div>
+
+</body>
+</html>

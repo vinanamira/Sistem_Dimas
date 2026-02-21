@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tagihan Bulanan</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 font-sans">
+
+<div class="min-h-screen flex flex-col md:flex-row">
+
+  <!-- Sidebar -->
+  <aside class="w-64 bg-gradient-to-b from-blue-400 to-blue-600 text-white p-6 hidden md:block">
+    <img src="asset/Logo SMK.jpg" class="h-28 mx-auto mb-8 rounded-xl bg-white p-2">
+
+    <p class="text-center font-bold">Dimas</p>
+    <p class="text-center text-sm mb-6">Bendahara</p>
+
+    <nav class="space-y-3 text-sm">
+      <a href="index_admin.html" class="block hover:bg-white/20 p-3 rounded-lg">📊 Dashboard</a>
+      <a href="Data_Siswa.html" class="block hover:bg-white/20 p-3 rounded-lg">👨‍🎓 Data Siswa</a>
+      <a href="Tagihan_Bulanan.html" class="block hover:bg-white/20 p-3 rounded-lg">💳 Tagihan Bulanan</a>
+      <a href="Pembayaran_Masuk.html" class="block bg-white/20 p-3 rounded-lg">⬆️ Pembayaran Masuk</a>
+      <a href="Laporan_Pengeluaran.html" class="block hover:bg-white/20 p-3 rounded-lg">📉 Laporan Pengeluaran</a>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="flex-1 p-4 md:p-8">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-8 mt-8">
+      <h2 class="text-xl font-bold">Laporan Pengeluaran Sekolah</h2>
+      <button class="bg-red-500 text-white px-3 py-1 rounded text-sm">Logout</button>
+    </div>
+
+    
+    <!-- Tabel Pembayaran Masuk -->
+    <div class="bg-white shadow rounded-lg p-6">
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-gray-200">
+          <thead class="bg-gray-100">
+            <tr>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nama Siswa</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Kelas</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nominal</th>
+              <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Keterangan</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-200 text-sm">
+            <tr>
+              <td class="px-6 py-4 whitespace-nowrap">Rina Andriani</td>
+              <td class="px-6 py-4 whitespace-nowrap">April 2025</td>
+              <td class="px-6 py-4 whitespace-nowrap">10 TKJ</td>
+              <td class="px-6 py-4 whitespace-nowrap">Rp 150.000</td>
+              <td class="px-6 py-4 whitespace-nowrap">Pembayaran Murid Baru</td>
+              </td>
+            </tr>
+            <tr>
+              <td class="px-6 py-4 whitespace-nowrap">Andi Pratama</td>
+              <td class="px-6 py-4 whitespace-nowrap">Mei 2025</td>
+              <td class="px-6 py-4 whitespace-nowrap">12 TKJ</td>
+              <td class="px-6 py-4 whitespace-nowrap">Rp 150.000</td>
+              <td class="px-6 py-4 whitespace-nowrap">Prakerin</td>
+              </td>
+            </tr>
+            <tr>
+              <td class="px-6 py-4 whitespace-nowrap">Siti Aisyah</td>
+              <td class="px-6 py-4 whitespace-nowrap">Juni 2025</td>
+              <td class="px-6 py-4 whitespace-nowrap">11 TSM</td>
+              <td class="px-6 py-4 whitespace-nowrap">Rp 150.000</td>
+              <td class="px-6 py-4 whitespace-nowrap">Kemah</td>
+              </td>
+            </tr>
+            <tr>
+              <td class="px-6 py-4 whitespace-nowrap">Dims Yowaimo</td>
+              <td class="px-6 py-4 whitespace-nowrap">Agustus 2025</td>
+              <td class="px-6 py-4 whitespace-nowrap">12 TSM</td>
+              <td class="px-6 py-4 whitespace-nowrap">Rp 150.000</td>
+              <td class="px-6 py-4 whitespace-nowrap">Kegiatan Akhir Tahun</td>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+</body>
+</html>

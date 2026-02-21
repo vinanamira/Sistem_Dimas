@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dashboard Pembayaran</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-50 font-sans">
+
+<div class="min-h-screen flex flex-col md:flex-row">
+
+  <!-- Sidebar -->
+  <aside class="w-64 bg-gradient-to-b from-blue-400 to-blue-600 text-white p-6 hidden md:block">
+    <img src="asset/Logo SMK.jpg" class="h-28 mx-auto mb-8 rounded-xl bg-white p-2">
+
+    <p class="text-center font-bold">Dimas </p>
+    <p class="text-center text-sm mb-6">Bendahara</p>
+
+    <nav class="space-y-3 text-sm">
+      <a href="index_admin.html" class="block bg-white/20 p-3 rounded-lg">📊 Dashboard</a>
+      <a href="Data_Siswa.html" class="block hover:bg-white/20 p-3 rounded-lg">👨‍🎓 Data Siswa</a>
+      <a href="Tagihan_Bulanan.html" class="block hover:bg-white/20 p-3 rounded-lg">💳 Tagihan Bulanan</a>
+      <a href="Pembayaran_Masuk.html" class="block hover:bg-white/20 p-3 rounded-lg">⬆️ Pembayaran Masuk</a>
+      <a href="Laporan_Pengeluaran.html" class="block hover:bg-white/20 p-3 rounded-lg">📉 Laporan Pengeluaran</a>
+    </nav>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="flex-1 p-4 md:p-8">
+    <!-- Header Dashboard -->
+    <div class="flex justify-between items-center mb-8">
+      <h2 class="text-xl font-bold">Dashboard Pembayaran SPP</h2>
+      <button class="bg-red-500 text-white px-3 py-1 rounded text-sm">Logout</button>
+    </div>
+
+    <!-- Ringkasan -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-2 mb-8 text-m">
+      <div class="bg-blue-50 p-4 rounded">
+        <p class="text-2xl font-bold">420</p>
+        <p class="text-gray-600 font-medium">Total Tagihan</p>
+        <p class="text-gray-800 text-sm mt-1">Rp 50.000.000</p>
+      </div>
+
+      <div class="bg-blue-50 p-4 rounded">
+        <p class="text-2xl font-bold">322</p>
+        <p class="text-gray-600 font-medium">Jumlah Siswa</p>
+        <p class="text-gray-800 text-sm mt-1">108 sisa tungakan</p>
+      </div>
+    </div>
+
+    <!-- Distribusi Status Pembayaran per Kelas -->
+    <div class="mb-10">
+    <h3 class="font-semibold text-lg mb-4">Distribusi Status Pembayaran Kelas</h3>
+
+    <!-- Container untuk membuat grafik agak melebar -->
+    <div class="overflow-x-auto">
+        <canvas id="chartKelas" class="w-sm max-w-[1500px] h-64"></canvas>
+    </div>
+    </div>
+
+    <script>
+    const ctx = document.getElementById('chartKelas');
+
+    const chartKelas = new Chart(ctx, {
+      type: 'bar',
+      data: {
+        labels: ['X-1', 'X-2', 'X-3', 'XI-1', 'XI-2', 'XI-3', 'XII-1', 'XII-2'],
+        datasets: [{
+          label: 'Jumlah Lunas',
+          data: [24, 20, 16, 14, 20, 12, 16, 10],
+          backgroundColor: 'rgba(59, 130, 246, 0.8)',
+          borderRadius: 6,
+        }]
+      },
+      options: {
+      responsive: true,
+      maintainAspectRatio: false, 
+      plugins: {
+        legend: { display: true }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            stepSize: 5
+          }
+        }
+      }
+    } 
+  });
+  </script>
+
+    <!-- Tabel Tunggakan -->
+    <div class="w-full md:w-full mt-8">
+    <h3 class="font-semibold mb-2">Tabel Tunggakan</h3>
+    <div class="overflow-x-auto">
+        <table class="w-full text-m border border-gray-200 rounded">
+        <thead class="bg-gray-100">
+            <tr>
+                <th class="w-1/2 px-8 py-6 border-r border-gray-400 text-center">Nama</th>
+                <th class="w-1/2 px-8 py-6 text-center">Kelas</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr class="border-t">
+            <td class="px-6 py-4 border-r border-gray-200">Lisa Black Pink</td>
+            <td class="px-6 py-4">X-1</td>
+            </tr>
+            <tr class="border-t">
+            <td class="px-6 py-4 border-r border-gray-200">Tehyung</td>
+            <td class="px-6 py-4">XII-3</td>
+            </tr>
+            <tr class="border-t">
+            <td class="px-6 py-4 border-r border-gray-200">Marselino</td>
+            <td class="px-6 py-4">XII-2</td>
+            </tr>
+            <tr class="border-t">
+            <td class="px-6 py-4 border-r border-gray-200">Ferari</td>
+            <td class="px-6 py-4">XII-1</td>
+            </tr>
+        </tbody>
+        </table>
+    </div>
+    </div>
+
+  </main>
+</div>
+
+</body>
+</html>

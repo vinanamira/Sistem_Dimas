@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Laporan Pengeluaran</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="bg-gray-50 font-sans">
+
+<div class="min-h-screen flex flex-col md:flex-row">
+
+<!-- Sidebar -->
+  <aside class="w-64 bg-gradient-to-b from-blue-400 to-blue-600 text-white p-6 hidden md:block">
+    <img src="asset/Logo SMK.jpg" class="h-28 mx-auto mb-8 rounded-xl bg-white p-2">
+
+    <p class="text-center font-bold">Dimas</p>
+    <p class="text-center text-sm mb-6">Bendahara</p>
+
+    <nav class="space-y-3 text-sm">
+      <a href="index_admin.html" class="block hover:bg-white/20 p-3 rounded-lg">📊 Dashboard</a>
+      <a href="Data_Siswa.html" class="block hover:bg-white/20 p-3 rounded-lg">👨‍🎓 Data Siswa</a>
+      <a href="Tagihan_Bulanan.html" class="block hover:bg-white/20 p-3 rounded-lg">💳 Tagihan Bulanan</a>
+      <a href="Pembayaran_Masuk.html" class="block hover:bg-white/20 p-3 rounded-lg">⬆️ Pembayaran Masuk</a>
+      <a href="Laporan_Pengeluaran.html" class="block bg-white/20 p-3 rounded-lg">📉 Laporan Pengeluaran</a>
+    </nav>
+  </aside>
+
+<!-- MAIN -->
+<main class="flex-1 p-6">
+
+<!-- Header -->
+<div class="flex justify-between items-center mb-8 mt-8">
+  <h2 class="text-xl font-bold">Laporan Pengeluaran Sekolah</h2>
+  <button class="bg-red-500 text-white px-3 py-1 rounded text-sm">Logout</button>
+</div>
+
+<!-- Ringkasan -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+  
+  <div class="bg-blue-50 p-4 rounded shadow">
+    <p class="text-gray-500 text-sm">Total Pengeluaran</p>
+    <p class="text-xl font-bold">Rp 5.400.000</p>
+  </div>
+
+  <div class="bg-blue-50 p-4 rounded shadow">
+    <p class="text-gray-500 text-sm">Pengeluaran Pendidikan</p>
+    <p class="text-xl font-bold">Rp 3.200.000</p>
+  </div>
+
+  <div class="bg-blue-50 p-4 rounded shadow">
+    <p class="text-gray-500 text-sm">Pengeluaran Sarana</p>
+    <p class="text-xl font-bold">Rp 2.200.000</p>
+  </div>
+
+</div>
+
+<!-- Tombol Tambah -->
+<div class="mt-4 flex justify-between">
+    <button class="px-8 py-3 bg-gradient-to-r from-blue-600 to-green-500 text-white rounded-full shadow-lg hover:scale-105 transition">
+      + Tambah Pengeluaran
+    </button>
+  </div>
+
+<!-- Tabel Pengeluaran -->
+<div class="bg-white rounded shadow p-4 overflow-x-auto mt-8">
+
+<table class="w-full text-ml border">
+<thead class="bg-gray-100">
+<tr>
+  <th class="border px-3 py-2">Tanggal</th>
+  <th class="border px-3 py-2">Kategori</th>
+  <th class="border px-3 py-2">Keterangan</th>
+  <th class="border px-3 py-2">Jumlah</th>
+  <th class="border px-3 py-2">Aksi</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+  <td class="border px-3 py-2">08 Feb 2026</td>
+  <td class="border px-3 py-2">Pengadaan Buku</td>
+  <td class="border px-3 py-2">Buku Paket Kelas X</td>
+  <td class="border px-3 py-2">Rp 2.000.000</td>
+  <td class="border px-3 py-2 space-x-2">
+    <button class="bg-yellow-400 px-2 py-1 rounded text-xs">Edit</button>
+    <button class="bg-red-500 text-white px-2 py-1 rounded text-xs">Hapus</button>
+  </td>
+</tr>
+
+<tr>
+  <td class="border px-3 py-2">05 Feb 2026</td>
+  <td class="border px-3 py-2">Perbaikan Ruang</td>
+  <td class="border px-3 py-2">Renovasi Kelas XI</td>
+  <td class="border px-3 py-2">Rp 1.500.000</td>
+  <td class="border px-3 py-2 space-x-2">
+    <button class="bg-yellow-400 px-2 py-1 rounded text-xs">Edit</button>
+    <button class="bg-red-500 text-white px-2 py-1 rounded text-xs">Hapus</button>
+  </td>
+</tr>
+
+<tr>
+  <td class="border px-3 py-2">02 Feb 2026</td>
+  <td class="border px-3 py-2">ATK</td>
+  <td class="border px-3 py-2">Pembelian Spidol & Kertas</td>
+  <td class="border px-3 py-2">Rp 900.000</td>
+  <td class="border px-3 py-2 space-x-2">
+    <button class="bg-yellow-400 px-2 py-1 rounded text-xs">Edit</button>
+    <button class="bg-red-500 text-white px-2 py-1 rounded text-xs">Hapus</button>
+  </td>
+</tr>
+
+</tbody>
+</table>
+
+</div>
+
+</main>
+</div>
+
+</body>
+</html>

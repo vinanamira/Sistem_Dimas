@@ -1,0 +1,4 @@
+Akun default — Password: admin123
+Admin: admin_bendahara
+Kepala: kepsek
+Siswa: siswa001

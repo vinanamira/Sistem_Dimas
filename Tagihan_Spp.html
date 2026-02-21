@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dashboard Pembayaran</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 font-sans">
+
+  <div class="min-h-screen flex flex-col md:flex-row">
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-gradient-to-b from-blue-400 to-blue-600 text-white p-6 hidden md:block">
+      <img src="asset/Logo SMK.jpg" class="h-28 mx-auto mb-8 rounded-xl bg-white p-2">
+
+      <p class="text-center font-bold">Dimas Siswa</p>
+      <p class="text-center text-sm mb-6">Kelas XII RPL</p>
+
+      <nav class="space-y-3 text-sm">
+        <a href="Index_siswa.html" class="block hover:bg-white/20 p-3 rounded-lg">📊 Dashboard</a>
+        <a href="Riwayat_pembayaran.html" class="block hover:bg-white/20 p-3 rounded-lg">📋 Riwayat Pembayaran</a>
+        <a href="Tagihan_Spp.html" class="block bg-white/20 p-3 rounded-lg">💳 Tagihan SPP</a>
+        <a href="Bantuan_Siswa.html" class="block hover:bg-white/20 p-3 rounded-lg">⚙ Bantuan</a>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-4 md:p-8">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-bold">Dashboard</h2>
+        <button class="bg-gray-200 text-sm px-3 py-1 rounded hover:bg-gray-300">Hai Dimas</button>
+      </div>
+
+      <!-- Ringkasan -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 gap-4 mb-10 text-m">
+        <div class="bg-blue-50 p-8 rounded">
+          <p class="text-black-500">Total Tagihan</p>
+          <p class="text-xl font-semibold">Rp 800.001</p>
+        </div>
+        <div class="bg-blue-50 p-8 rounded">
+          <p class="text-black-500">Status Pembayaran</p>
+          <p class="text-xl font-semibold">Juni Belum Lunas</p>
+        </div>
+      </div>
+
+    <!-- Progress Pembayaran -->
+        <div class="mb-10">
+        <h3 class="font-semibold mb-8">Progress Pembayaran</h3>
+        <div class="grid grid-cols-12 gap-2 text-center text-m">
+            
+            <!-- Bulan yang sudah dibayar -->
+            <div>
+            <div class="w-10 h-10 mx-auto bg-blue-300 text-white text-xs flex items-center justify-center rounded-sm">✔</div>
+            <div class="mt-4 mb-4">Jan</div>
+            </div>
+            <div>
+            <div class="w-10 h-10 mx-auto bg-blue-300 text-white text-xs flex items-center justify-center rounded-sm">✔</div>
+            <div class="mt-4 mb-4">Feb</div>
+            </div>
+            <div>
+            <div class="w-10 h-10 mx-auto bg-blue-300 text-white text-xs flex items-center justify-center rounded-sm">✔</div>
+            <div class="mt-4 mb-4">Mar</div>
+            </div>
+            <div>
+            <div class="w-10 h-10 mx-auto bg-blue-300 text-white text-xs flex items-center justify-center rounded-sm">✔</div>
+            <div class="mt-4 mb-4">Apr</div>
+            </div>
+            <div>
+            <div class="w-10 h-10 mx-auto bg-blue-300 text-white text-xs flex items-center justify-center rounded-sm">✔</div>
+            <div class="mt-4">Mei</div>
+            </div>
+
+            <!-- Bulan yang belum dibayar -->
+            <div>
+            <div class="w-10 h-10 mx-auto bg-gray-200 text-gray-400 text-xs flex items-center justify-center rounded-sm">-</div>
+            <div class="mt-4 mb-4">Jun</div>
+            </div>
+            <div>
+            <div class="w-10 h-10 mx-auto bg-gray-200 text-gray-400 text-xs flex items-center justify-center rounded-sm">-</div>
+            <div class="mt-4 mb-4">Jul</div>
+            </div>
+            <div>
+            <div class="w-10 h-10 mx-auto bg-gray-200 text-gray-400 text-xs flex items-center justify-center rounded-sm">-</div>
+            <div class="mt-4 mb-4">Agu</div>
+            </div>
+            <div>
+            <div class="w-10 h-10 mx-auto bg-gray-200 text-gray-400 text-xs flex items-center justify-center rounded-sm">-</div>
+            <div class="mt-4 mb-4">Sep</div>
+            </div>
+            <div>
+            <div class="w-10 h-10 mx-auto bg-gray-200 text-gray-400 text-xs flex items-center justify-center rounded-sm">-</div>
+            <div class="mt-4 mb-4">Okt</div>
+            </div>
+            <div>
+            <div class="w-10 h-10 mx-auto bg-gray-200 text-gray-400 text-xs flex items-center justify-center rounded-sm">-</div>
+            <div class="mt-4 mb-4">Nov</div>
+            </div>
+            <div>
+            <div class="w-10 h-10 mx-auto bg-gray-200 text-gray-400 text-xs flex items-center justify-center rounded-sm">-</div>
+            <div class="mt-4 mb-4">Des</div>
+            </div>
+        </div>
+
+<!-- Kegiatan Khusus -->
+  <div class="mb-10 mt-6">
+    <h3 class="font-semibold text-lg mb-4">Kegiatan Khusus</h3>
+    <div class="overflow-x-auto rounded shadow">
+      <table class="min-w-full text-sm text-left bg-white border border-gray-200">
+        <thead class="bg-gray-100 text-gray-700 font-semibold">
+          <tr>
+            <th class="px-6 py-3">Kegiatan</th>
+            <th class="px-6 py-3">Kelas</th>
+            <th class="px-6 py-3">Status</th>
+            <th class="px-6 py-3">Total Tagihan</th>
+            <th class="px-6 py-3">Tanggal Bayar</th>
+            <th class="px-6 py-3">Aksi</th>
+          </tr>
+        </thead>
+        <tbody class="text-gray-800">
+          <tr class="border-t">
+            <td class="px-6 py-4">Pembayaran Murid Baru</td>
+            <td class="px-6 py-4">10</td>
+            <td class="px-6 py-4">
+              <span class="bg-red-100 text-red-600 px-2 py-1 rounded text-xs font-semibold">Belum Lunas</span>
+            </td>
+            <td class="px-6 py-4">Rp 150.000</td>
+            <td class="px-6 py-4 text-gray-400">–</td>
+            <td class="px-6 py-4">
+              <button class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm">Bayar Sekarang</button>
+            </td>
+          </tr>
+          <tr class="border-t">
+            <td class="px-6 py-4">Kunjungan Industri</td>
+            <td class="px-6 py-4">11</td>
+            <td class="px-6 py-4">
+              <span class="bg-red-100 text-red-600 px-2 py-1 rounded text-xs font-semibold">Belum Lunas</span>
+            </td>
+            <td class="px-6 py-4">Rp 150.000</td>
+            <td class="px-6 py-4 text-gray-400">–</td>
+            <td class="px-6 py-4">
+              <button class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm">Bayar Sekarang</button>
+            </td>
+          </tr>
+          <tr class="border-t">
+            <td class="px-6 py-4">Prakerin</td>
+            <td class="px-6 py-4">12</td>
+            <td class="px-6 py-4">
+              <span class="bg-green-100 text-green-600 px-2 py-1 rounded text-xs font-semibold">Lunas</span>
+            </td>
+            <td class="px-6 py-4">Rp 200.000</td>
+            <td class="px-6 py-4">05 Apr 2025</td>
+            <td class="px-6 py-4">
+              <button class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 text-sm">Lihat Kwitansi</button>
+            </td>
+          </tr>
+          <tr class="border-t">
+            <td class="px-6 py-4">Kegiatan Akhir Tahun</td>
+            <td class="px-6 py-4">12</td>
+            <td class="px-6 py-4">
+              <span class="bg-red-100 text-red-600 px-2 py-1 rounded text-xs font-semibold">Belum Lunas</span>
+            </td>
+            <td class="px-6 py-4">Rp 120.000</td>
+            <td class="px-6 py-4 text-gray-400">–</td>
+            <td class="px-6 py-4">
+              <button class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm">Bayar Sekarang</button>
+            </td>
+          </tr>
+          <tr class="border-t">
+            <td class="px-6 py-4">Kemah Sekolah</td>
+            <td class="px-6 py-4">10, 11, 12</td>
+            <td class="px-6 py-4">
+              <span class="bg-red-100 text-red-600 px-2 py-1 rounded text-xs font-semibold">Belum Lunas</span>
+            </td>
+            <td class="px-6 py-4">Rp 120.000</td>
+            <td class="px-6 py-4 text-gray-400">–</td>
+            <td class="px-6 py-4">
+              <button class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm">Bayar Sekarang</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Button Bayar di bawah -->
+    <div class="mt-6 flex justify-center">
+      <button class="px-8 py-3 bg-blue-600 text-white rounded hover:bg-blue-700 transition">Bayar Sekarang</button>
+    </div>
+  </div>
+    </main>
+  </div>
+</body>
+</html>

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Dashboard Pembayaran</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 font-sans">
+
+  <div class="min-h-screen flex flex-col md:flex-row">
+
+    <!-- Sidebar -->
+    <aside class="w-64 bg-gradient-to-b from-blue-400 to-blue-600 text-white p-6 hidden md:block">
+      <img src="asset/Logo SMK.jpg" class="h-28 mx-auto mb-8 rounded-xl bg-white p-2">
+
+      <p class="text-center font-bold">Dimas Siswa</p>
+      <p class="text-center text-sm mb-6">Kelas XII RPL</p>
+
+      <nav class="space-y-3 text-sm">
+        <a href="Index_siswa.html" class="block hover:bg-white/20 p-3 rounded-lg">📊 Dashboard</a>
+        <a href="Riwayat_pembayaran.html" class="block hover:bg-white/20 p-3 rounded-lg">📋 Riwayat Pembayaran</a>
+        <a href="Tagihan_Spp.html" class="block hover:bg-white/20 p-3 rounded-lg">💳 Tagihan SPP</a>
+        <a href="Bantuan_Siswa.html" class="block bg-white/20 p-3 rounded-lg">⚙ Bantuan</a>
+      </nav>
+    </aside>
+    <!-- Main Content -->
+    <main class="flex-1 p-4 md:p-8">
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-bold">Bantuan</h2>
+        <button class="bg-gray-200 text-sm px-3 py-1 rounded hover:bg-gray-300">Hai Dimas</button>
+      </div>
+      <!-- Bantuan -->
+    <div class="max-w-xl mx-auto mt-10">
+    <div class="space-y-3">
+
+        <!-- Item FAQ -->
+        <div class="border rounded-lg overflow-hidden">
+        <button onclick="toggleFAQ(0)" class="w-full text-left px-4 py-3 bg-blue-50 hover:bg-gray-50 font-medium transition-colors" id="btn-0">
+            Bagaimana cara melakukan pembayaran?
+        </button>
+        <div class="hidden px-4 pb-4 text-gray-600 text-sm" id="faq-0">
+            Anda dapat melakukan pembayaran melalui dashboard dengan menekan tombol “Bayar Sekarang” dan mengikuti instruksi selanjutnya.
+        </div>
+        </div>
+
+        <div class="border rounded-lg overflow-hidden">
+        <button onclick="toggleFAQ(1)" class="w-full text-left px-4 py-3 bg-blue-50 hover:bg-gray-50 font-medium transition-colors" id="btn-1">
+            Apa yang harus saya lakukan jika terdapat kesalahan pada tagihan?
+        </button>
+        <div class="hidden px-4 pb-4 text-gray-600 text-sm" id="faq-1">
+            Segera hubungi bagian keuangan melalui kontak yang tersedia di halaman bantuan atau kunjungi langsung kantor administrasi.
+        </div>
+        </div>
+
+        <div class="border rounded-lg overflow-hidden">
+        <button onclick="toggleFAQ(2)" class="w-full text-left px-4 py-3 bg-blue-50 hover:bg-gray-50 font-medium transition-colors" id="btn-2">
+            Mengapa status pembayaran saya belum diperbarui?
+        </button>
+        <div class="hidden px-4 pb-4 text-gray-600 text-sm" id="faq-2">
+            Pembaruan status pembayaran membutuhkan waktu maksimal 1x24 jam setelah transaksi berhasil dilakukan.
+        </div>
+        </div>
+
+        <div class="border rounded-lg overflow-hidden">
+        <button onclick="toggleFAQ(3)" class="w-full text-left px-4 py-3 bg-blue-50 hover:bg-gray-50 font-medium transition-colors" id="btn-3">
+            Bagaimana cara menghubungi bagian keuangan?
+        </button>
+        <div class="hidden px-4 pb-4 text-gray-600 text-sm" id="faq-3">
+            Anda dapat menghubungi bagian keuangan melalui nomor WhatsApp resmi sekolah atau email yang tercantum pada halaman kontak.
+        </div>
+        </div>
+
+    </div>
+    </div>
+
+    <script>
+    function toggleFAQ(index) {
+        const content = document.getElementById(`faq-${index}`);
+        const button = document.getElementById(`btn-${index}`);
+
+        const isOpen = !content.classList.contains('hidden');
+
+        // Tutup semua
+        for (let i = 0; i < 4; i++) {
+        document.getElementById(`faq-${i}`).classList.add('hidden');
+        document.getElementById(`btn-${i}`).classList.remove('text-blue-600');
+        }
+
+        // Buka jika sebelumnya tertutup
+        if (!isOpen) {
+        content.classList.remove('hidden');
+        button.classList.add('text-blue-600');
+        }
+    }
+    </script>
+
+    </main>
+  </div>
+</body>
+</html>
