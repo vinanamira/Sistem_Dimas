@@ -71,10 +71,13 @@ if ($jml_bayar > $sisa_tagihan_sekarang) {
 $sisa_baru = $sisa_tagihan_sekarang - $jml_bayar;
 $status_baru = $sisa_baru <= 0 ? 'lunas' : 'cicilan';
 
-$buktiPath = null;
+$buktiData = null;
+$buktiMime = null;
 if (isset($_FILES['bukti_transfer']) && $_FILES['bukti_transfer']['error'] !== UPLOAD_ERR_NO_FILE) {
     try {
-        $buktiPath = uploadFile($_FILES['bukti_transfer'], 'bukti_transfer_keg');
+        $bukti     = readBuktiUpload($_FILES['bukti_transfer']);
+        $buktiData = $bukti['data'];
+        $buktiMime = $bukti['mime'];
     } catch (Exception $e) {
         $db->close();
         jsonResponse(false, $e->getMessage(), [], 400);
@@ -83,7 +86,7 @@ if (isset($_FILES['bukti_transfer']) && $_FILES['bukti_transfer']['error'] !== U
 
 try {
     $db->begin_transaction();
-    $id_trx = simpanTransaksiPembayaran($db, $id_siswa, null, $jml_bayar, $tgl, $ket, 'kegiatan', $buktiPath);
+    $id_trx = simpanTransaksiPembayaran($db, $id_siswa, null, $jml_bayar, $tgl, $ket, 'kegiatan', $buktiData, $buktiMime);
     
     // update fk tagihan kegiatan inside transaksi
     $upTrx = $db->prepare('UPDATE transaksi SET id_tagihan_keg = ? WHERE id_transaksi = ?');

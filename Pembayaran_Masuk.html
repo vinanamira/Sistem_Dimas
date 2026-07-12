@@ -293,13 +293,12 @@ function tutupModalPembayaran(){
     .classList.remove('flex');
 }
 
-function simpanPembayaranManual(){
+async function simpanPembayaranManual(){
 
-  const nama =
-    document.getElementById('namaPembayaran').value;
+  const selSiswa =
+    document.getElementById('namaPembayaran');
 
-  const kelas =
-    document.getElementById('kelasPembayaran').value;
+  const id_siswa = selSiswa ? selSiswa.value : '';
 
   const tanggal =
     document.getElementById('tanggalPembayaran').value;
@@ -310,31 +309,33 @@ function simpanPembayaranManual(){
   const keterangan =
     document.getElementById('keteranganPembayaran').value;
 
-  if(!nama || !kelas || !tanggal || !nominal){
+  if(!id_siswa || !tanggal || !nominal){
     alert('Lengkapi data pembayaran');
     return;
   }
 
-  const tbody =
-    document.querySelector('tbody');
+  const fd = new FormData();
+  fd.append('id_siswa', id_siswa);
+  fd.append('jml_bayar', nominal);
+  fd.append('tgl_transaksi', tanggal);
+  fd.append('keterangan', keterangan || 'Pembayaran Masuk');
 
-  const tr = document.createElement('tr');
-
-  tr.innerHTML =
-    '<td class="px-6 py-4">' + nama + '</td>' +
-    '<td class="px-6 py-4">' + kelas + '</td>' +
-    '<td class="px-6 py-4">' + tanggal + '</td>' +
-    '<td class="px-6 py-4">Rp ' +
-    Number(nominal).toLocaleString('id-ID') +
-    '</td>' +
-    '<td class="px-6 py-4">' + keterangan + '</td>' +
-    '<td class="px-6 py-4">-</td>';
-
-  tbody.prepend(tr);
-
-  alert('Pembayaran berhasil ditambahkan');
-
-  tutupModalPembayaran();
+  try {
+    const r = await fetch('backend/proses/transaksi/simpan_transaksi.php', {
+      method: 'POST',
+      body: fd,
+      credentials: 'same-origin',
+    });
+    if (r.ok) {
+      alert('Pembayaran berhasil ditambahkan');
+      tutupModalPembayaran();
+      window.location.reload();
+    } else {
+      alert('Gagal menyimpan pembayaran');
+    }
+  } catch (e) {
+    alert('Terjadi kesalahan jaringan');
+  }
 }
 
 function bukaModalPemasukan(){
@@ -355,7 +356,7 @@ function tutupModalPemasukan(){
     .classList.remove('flex');
 }
 
-function simpanPemasukan(){
+async function simpanPemasukan(){
 
   const tanggal =
     document.getElementById('tanggalPemasukan').value;
@@ -379,25 +380,30 @@ function simpanPemasukan(){
     return;
   }
 
-  const tbody =
-    document.getElementById('tabelPemasukanLain');
+  const fd = new FormData();
+  fd.append('jenis_uang', 'pemasukan');
+  fd.append('jml_uang', nominal);
+  fd.append('tgl_uang', tanggal);
+  fd.append('kategori', jenis);
+  fd.append('sumber_dana', sumber);
+  fd.append('ket_uang', keterangan || (sumber + ' - ' + jenis));
 
-  const tr = document.createElement('tr');
-
-  tr.innerHTML =
-    '<td class="px-6 py-4">' + tanggal + '</td>' +
-    '<td class="px-6 py-4">' + sumber + '</td>' +
-    '<td class="px-6 py-4">' + jenis + '</td>' +
-    '<td class="px-6 py-4">Rp ' +
-    Number(nominal).toLocaleString('id-ID') +
-    '</td>' +
-    '<td class="px-6 py-4">' + keterangan + '</td>';
-
-  tbody.prepend(tr);
-
-  alert('Pemasukan berhasil ditambahkan');
-
-  tutupModalPemasukan();
+  try {
+    const r = await fetch('backend/proses/keuangan/tambah_keuangan.php', {
+      method: 'POST',
+      body: fd,
+      credentials: 'same-origin',
+    });
+    if (r.ok) {
+      alert('Pemasukan berhasil ditambahkan');
+      tutupModalPemasukan();
+      window.location.reload();
+    } else {
+      alert('Gagal menyimpan pemasukan');
+    }
+  } catch (e) {
+    alert('Terjadi kesalahan jaringan');
+  }
 }
 
 function bukaModalBukti(url) {
@@ -417,6 +423,6 @@ function tutupModalBukti() {
 }
 
 </script>
-<script src="backend/js/integration.js" defer></script>
+<script src="backend/js/integration.js?v=9" defer></script>
 </body>
 </html>

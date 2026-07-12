@@ -69,10 +69,13 @@ if ($jml_input > $jml_max) {
 
 $jml_bayar = $jml_input > 0 ? $jml_input : $jml_max;
 
-$buktiPath = null;
+$buktiData = null;
+$buktiMime = null;
 if (isset($_FILES['bukti_transfer']) && $_FILES['bukti_transfer']['error'] !== UPLOAD_ERR_NO_FILE) {
     try {
-        $buktiPath = uploadFile($_FILES['bukti_transfer'], 'bukti_transfer');
+        $bukti     = readBuktiUpload($_FILES['bukti_transfer']);
+        $buktiData = $bukti['data'];
+        $buktiMime = $bukti['mime'];
     } catch (Exception $e) {
         $db->close();
         jsonResponse(false, $e->getMessage(), [], 400);
@@ -80,7 +83,7 @@ if (isset($_FILES['bukti_transfer']) && $_FILES['bukti_transfer']['error'] !== U
 }
 
 try {
-    simpanTransaksiPembayaran($db, $id_siswa, $id_tunggakan, $jml_bayar, $tgl, 'Pembayaran SPP', 'spp', $buktiPath);
+    simpanTransaksiPembayaran($db, $id_siswa, $id_tunggakan, $jml_bayar, $tgl, 'Pembayaran SPP', 'spp', $buktiData, $buktiMime);
 } catch (Throwable $e) {
     $db->close();
     jsonResponse(false, $e->getMessage(), [], 400);

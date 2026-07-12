@@ -13,7 +13,8 @@ function simpanTransaksiPembayaran(
     string $tgl_transaksi,
     string $keterangan = 'Pembayaran SPP',
     string $jenis = 'spp',
-    ?string $buktiPath = null
+    ?string $buktiData = null,
+    ?string $buktiMime = null
 ): int {
     if ($id_siswa <= 0 || $jml_bayar <= 0) {
         throw new InvalidArgumentException('Data transaksi tidak valid');
@@ -33,18 +34,18 @@ function simpanTransaksiPembayaran(
 
     if ($id_tunggakan) {
         $stmt = $db->prepare(
-            'INSERT INTO transaksi (id_siswa, id_tunggakan, nama_siswa, jml_bayar, tgl_transaksi, keterangan, bukti_transfer)
-             VALUES (?, ?, ?, ?, ?, ?, ?)'
+            'INSERT INTO transaksi (id_siswa, id_tunggakan, nama_siswa, jml_bayar, tgl_transaksi, keterangan, bukti_blob, bukti_mime)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
         );
-        $stmt->bind_param('iisdsss', $id_siswa, $id_tunggakan, $nama_siswa, $jml_bayar, $tgl_transaksi, $keterangan, $buktiPath);
+        $stmt->bind_param('iisdssss', $id_siswa, $id_tunggakan, $nama_siswa, $jml_bayar, $tgl_transaksi, $keterangan, $buktiData, $buktiMime);
     } else {
         $stmt = $db->prepare(
-            'INSERT INTO transaksi (id_siswa, nama_siswa, jml_bayar, tgl_transaksi, keterangan, bukti_transfer)
-             VALUES (?, ?, ?, ?, ?, ?)'
+            'INSERT INTO transaksi (id_siswa, nama_siswa, jml_bayar, tgl_transaksi, keterangan, bukti_blob, bukti_mime)
+             VALUES (?, ?, ?, ?, ?, ?, ?)'
         );
-        $stmt->bind_param('isdsss', $id_siswa, $nama_siswa, $jml_bayar, $tgl_transaksi, $keterangan, $buktiPath);
+        $stmt->bind_param('isdssss', $id_siswa, $nama_siswa, $jml_bayar, $tgl_transaksi, $keterangan, $buktiData, $buktiMime);
     }
-    
+
     $stmt->execute();
     $id_transaksi = (int) $db->insert_id;
     $stmt->close();

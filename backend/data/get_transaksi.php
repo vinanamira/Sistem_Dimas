@@ -8,7 +8,8 @@ header('Content-Type: application/json; charset=utf-8');
 
 $db    = getDB();
 $query = "SELECT tr.id_transaksi, tr.nama_siswa, tr.jml_bayar, tr.tgl_transaksi,
-                 s.kelas, s.nis, tr.keterangan, tr.bukti_transfer
+                 s.kelas, s.nis, tr.keterangan, tr.bukti_transfer,
+                 (tr.bukti_blob IS NOT NULL) AS has_bukti
           FROM transaksi tr
           JOIN siswa s ON tr.id_siswa = s.id_siswa
           ORDER BY tr.tgl_transaksi DESC";

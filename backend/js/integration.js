@@ -711,22 +711,63 @@
 
     // Load from cache first
     let j = getCache('dashboard_siswa');
+    let keg = getCache('tagihan_kegiatan');
     if (j) {
-      updateDashboardSiswa(j, cards);
+      updateDashboardSiswa(j, cards, keg);
+      updateTagihanDropdown(j, keg);
     }
 
     // Then fetch from server
-    const jServer = await apiJson('backend/data/get_dashboard_siswa.php');
+    const [jServer, kegServer] = await Promise.all([
+      apiJson('backend/data/get_dashboard_siswa.php'),
+      apiJson('backend/data/get_tagihan_kegiatan.php')
+    ]);
     if (jServer && jServer.success) {
       j = jServer;
       setCache('dashboard_siswa', j);
-      updateDashboardSiswa(j, cards);
     }
+    if (kegServer && kegServer.success) {
+      keg = kegServer;
+      setCache('tagihan_kegiatan', keg);
+    }
+    updateDashboardSiswa(j, cards, keg);
+    updateTagihanDropdown(j, keg);
   }
 
-  function updateDashboardSiswa(j, cards) {
+  function hitungTotalBulanIni(j, keg) {
     const s = j.siswa || {};
-    cards[0].textContent = formatRupiah(j.total_tagihan);
+    const currentMonthStr = new Date().toLocaleDateString('id-ID', { month: 'long' });
+    const currentYearStr = new Date().getFullYear().toString();
+    const currentMonthNum = new Date().getMonth() + 1;
+
+    let total = 0;
+    if (s.tunggakan_list) {
+      s.tunggakan_list.forEach(function (t) {
+        if (t.periode_tagihan && t.periode_tagihan.toLowerCase().includes(currentMonthStr.toLowerCase()) && t.periode_tagihan.includes(currentYearStr)) {
+          total += Number(t.jml_tunggakan || t.jumlah_tagihan_awal || 0);
+        }
+      });
+    }
+    if (keg && keg.data) {
+      const kelasStr = (s.kelas) ? s.kelas.toUpperCase() : '';
+      const isKelasXI_XII = kelasStr.startsWith('XI') || kelasStr.startsWith('XII');
+      keg.data.forEach(function (row) {
+        let isHidden = false;
+        if (isKelasXI_XII && currentMonthNum === 7 && (row.nama_kegiatan || '').toUpperCase().includes('DSP')) isHidden = true;
+        const isKegAkhirTahun = (row.nama_kegiatan || '').trim().toLowerCase() === 'kegiatan akhir tahun';
+        if (isKegAkhirTahun && (currentMonthNum < 1 || currentMonthNum > 4)) isHidden = true;
+        if (!isHidden) {
+          const sisa = row.sisa_tagihan !== undefined && row.sisa_tagihan !== null ? row.sisa_tagihan : row.jumlah;
+          total += Number(sisa);
+        }
+      });
+    }
+    return total;
+  }
+
+  function updateDashboardSiswa(j, cards, keg) {
+    const s = j.siswa || {};
+    cards[0].textContent = formatRupiah(hitungTotalBulanIni(j, keg));
     cards[1].textContent = Number(s.jml_tunggakan) > 0 ? 'Belum Bayar' : 'Lunas';
     const jt = s.tgl_jatuh_tempo ? formatTanggalId(s.tgl_jatuh_tempo) : '-';
     cards[2].textContent = jt;
@@ -741,17 +782,9 @@
       pct.textContent = (j.progress_pct || 0) + '% pembayaran selesai';
     }
 
-    const idTunEl = document.getElementById('idTunggakanSpp');
     const inpBulan = document.getElementById('inputBulanTagihanSpp');
-    const inpJml = document.getElementById('inputJumlahTagihanSpp');
-    if (idTunEl && j.siswa && j.siswa.id_tunggakan) {
-      idTunEl.value = j.siswa.id_tunggakan;
-    }
     if (inpBulan) {
       inpBulan.value = j.siswa.periode_tagihan || '-';
-    }
-    if (inpJml) {
-      inpJml.value = formatRupiah(j.sisa_tunggakan || 0);
     }
 
     const tb = document.querySelector('table.w-full.text-sm tbody');
@@ -1125,7 +1158,7 @@
         (r.keterangan || '') +
         '</td>' +
         '<td class="px-6 py-4 whitespace-nowrap">' +
-        (r.bukti_transfer ? '<button onclick="bukaModalBukti(\'' + BASE + r.bukti_transfer + '\')" class="text-blue-500 underline hover:text-blue-700">Lihat</button>' : '-') +
+        (Number(r.has_bukti) ? '<button onclick="bukaModalBukti(\'' + BASE + 'backend/data/get_bukti.php?id=' + r.id_transaksi + '\')" class="text-blue-500 underline hover:text-blue-700">Lihat</button>' : (r.bukti_transfer ? '<button onclick="bukaModalBukti(\'' + BASE + r.bukti_transfer + '\')" class="text-blue-500 underline hover:text-blue-700">Lihat</button>' : '-')) +
         '</td>';
       tb.appendChild(tr);
     });
@@ -1135,20 +1168,40 @@
       const s = await apiJson('backend/data/get_siswa.php');
       if (s && s.success && s.data) {
         selSiswa.innerHTML = '<option value="">-- Pilih Siswa --</option>';
-        window.siswaDataMap = {};
         s.data.forEach(function (siswa) {
-          window.siswaDataMap[siswa.nama_siswa] = siswa.kelas;
           const opt = document.createElement('option');
-          opt.value = siswa.nama_siswa;
+          opt.value = siswa.id_siswa;
           opt.textContent = siswa.nama_siswa;
+          opt.dataset.kelas = siswa.kelas || '';
+          opt.dataset.nama = siswa.nama_siswa || '';
           selSiswa.appendChild(opt);
         });
 
         selSiswa.addEventListener('change', function () {
           const kelasInput = document.getElementById('kelasPembayaran');
+          const opt = this.options[this.selectedIndex];
           if (kelasInput) {
-            kelasInput.value = window.siswaDataMap[this.value] || '';
+            kelasInput.value = opt ? (opt.dataset.kelas || '') : '';
           }
+        });
+      }
+    }
+
+    // Muat data Pemasukan Lain-lain yang tersimpan (agar tetap tampil setelah reload)
+    const tbodyPemasukan = document.getElementById('tabelPemasukanLain');
+    if (tbodyPemasukan) {
+      const p = await apiJson('backend/data/get_pemasukan.php');
+      if (p && p.success) {
+        tbodyPemasukan.innerHTML = '';
+        (p.data || []).forEach(function (r) {
+          const tr = document.createElement('tr');
+          tr.innerHTML =
+            '<td class="px-6 py-4">' + formatTanggalId(r.tgl_uang) + '</td>' +
+            '<td class="px-6 py-4">' + (r.sumber_dana || '-') + '</td>' +
+            '<td class="px-6 py-4">' + (r.kategori || '') + '</td>' +
+            '<td class="px-6 py-4">' + formatRupiah(r.jml_uang) + '</td>' +
+            '<td class="px-6 py-4">' + (r.ket_uang || '') + '</td>';
+          tbodyPemasukan.appendChild(tr);
         });
       }
     }
@@ -1198,9 +1251,10 @@
       }
 
       // Also load pemasukan total and merged table rows
-      const [jPembayaran, jPengeluaran] = await Promise.all([
+      const [jPembayaran, jPengeluaran, jPemasukan] = await Promise.all([
         apiJson('backend/data/get_transaksi.php'),
         apiJson('backend/data/get_pengeluaran.php'),
+        apiJson('backend/data/get_pemasukan.php'),
       ]);
 
       let totalPemasukan = 0;
@@ -1219,6 +1273,25 @@
               tgl: item.tgl_transaksi,
               deskripsi: item.keterangan || 'Pembayaran Masuk',
               pemasukan: Number(item.jml_bayar || 0),
+              pengeluaran: 0,
+            };
+          })
+        );
+      }
+
+      if (jPemasukan && jPemasukan.success) {
+        combinedRows = combinedRows.concat(
+          (jPemasukan.data || []).filter(function (item) {
+            const d = new Date((item.tgl_uang || '') + 'T00:00:00');
+            return (yearFilter === null || d.getFullYear() === yearFilter) &&
+              (monthFilter === null || d.getMonth() + 1 === monthFilter);
+          }).map(function (item) {
+            totalPemasukan += Number(item.jml_uang || 0);
+            const sumber = item.sumber_dana ? ' (' + item.sumber_dana + ')' : '';
+            return {
+              tgl: item.tgl_uang,
+              deskripsi: (item.kategori || 'Pemasukan Lain') + sumber + (item.ket_uang ? ' - ' + item.ket_uang : ''),
+              pemasukan: Number(item.jml_uang || 0),
               pengeluaran: 0,
             };
           })
@@ -1382,18 +1455,15 @@
     if (j && j.siswa && j.siswa.tunggakan_list) {
       j.siswa.tunggakan_list.forEach(function (t) {
         if (Number(t.jml_tunggakan) > 0) {
-          const isThisMonth = t.periode_tagihan && t.periode_tagihan.toLowerCase().includes(currentMonthStr.toLowerCase()) && t.periode_tagihan.includes(currentYearStr);
-          if (isThisMonth) {
-            const opt = document.createElement('option');
-            opt.value = 'spp_' + t.id_tunggakan;
-            let label = t.periode_tagihan || '';
-            if (!label.toLowerCase().startsWith('spp')) label = 'SPP ' + label;
-            opt.textContent = label;
-            opt.dataset.sisa = t.jml_tunggakan;
-            opt.dataset.total = t.jumlah_tagihan_awal || t.jml_tunggakan;
-            sel.appendChild(opt);
-            adaTagihan = true;
-          }
+          const opt = document.createElement('option');
+          opt.value = 'spp_' + t.id_tunggakan;
+          let label = t.periode_tagihan || '';
+          if (!label.toLowerCase().startsWith('spp')) label = 'SPP ' + label;
+          opt.textContent = label;
+          opt.dataset.sisa = t.jml_tunggakan;
+          opt.dataset.total = t.jumlah_tagihan_awal || t.jml_tunggakan;
+          sel.appendChild(opt);
+          adaTagihan = true;
         }
       });
     }
