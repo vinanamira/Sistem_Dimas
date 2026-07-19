@@ -601,8 +601,8 @@
 
     // Load from cache first
     let dash = getCache('dashboard_admin');
-    let ch = getCache('chart_kelas');
-    let tunggakan = getCache('tunggakan_admin');
+    let ch = getCache('chart_kelas_v2');
+    let tunggakan = getCache('tunggakan_admin_v2');
 
     // Display cached data if available
     if (dash) {
@@ -612,7 +612,8 @@
     // Then fetch from server
     const dashServer = await apiJson('backend/data/get_dashboard.php');
     const chServer = await apiJson('backend/data/get_chart_kelas.php');
-    const tunggakanServer = await apiJson('backend/data/get_tunggakan.php');
+    // Sumber tunggakan disamakan dengan halaman Tagihan Bulanan (SPP + kegiatan bulan berjalan)
+    const tunggakanServer = await apiJson('backend/data/get_siswa.php?filter=current_month');
 
     if (dashServer && dashServer.success) {
       dash = dashServer;
@@ -620,11 +621,11 @@
     }
     if (chServer && chServer.success) {
       ch = chServer;
-      setCache('chart_kelas', ch);
+      setCache('chart_kelas_v2', ch);
     }
     if (tunggakanServer && tunggakanServer.success) {
       tunggakan = tunggakanServer;
-      setCache('tunggakan_admin', tunggakan);
+      setCache('tunggakan_admin_v2', tunggakan);
     }
 
     // Update display with latest data
@@ -657,6 +658,9 @@
         .filter(function (t) {
           return Number(t.jml_tunggakan) > 0;
         })
+        .sort(function (a, b) {
+          return Number(b.jml_tunggakan) - Number(a.jml_tunggakan);
+        })
         .slice(0, 12)
         .forEach(function (t) {
           const tr = document.createElement('tr');
@@ -665,23 +669,43 @@
             '<td class="px-6 py-4 border-r border-gray-200">' +
             (t.nama_siswa || '') +
             '</td>' +
-            '<td class="px-6 py-4">' +
+            '<td class="px-6 py-4 border-r border-gray-200">' +
             (t.kelas || '') +
+            '</td>' +
+            '<td class="px-6 py-4 text-center">' +
+            formatRupiah(t.jml_tunggakan) +
             '</td>';
           tunggakanBody.appendChild(tr);
         });
     }
 
     if (ch && ch.success) {
+      // Hindari error "Canvas is already in use" saat render ulang (cache lalu server)
+      if (typeof Chart.getChart === 'function') {
+        const existing = Chart.getChart(chartEl);
+        if (existing) existing.destroy();
+      }
       new Chart(chartEl, {
         type: 'bar',
         data: {
           labels: ch.labels,
           datasets: [
             {
-              label: 'Jumlah Lunas',
-              data: ch.data,
-              backgroundColor: 'rgba(59, 130, 246, 0.8)',
+              label: 'Lunas',
+              data: ch.lunas || ch.data,
+              backgroundColor: 'rgba(34, 197, 94, 0.8)',
+              borderRadius: 6,
+            },
+            {
+              label: 'Cicilan',
+              data: ch.cicilan || [],
+              backgroundColor: 'rgba(234, 179, 8, 0.8)',
+              borderRadius: 6,
+            },
+            {
+              label: 'Belum Bayar',
+              data: ch.belum || [],
+              backgroundColor: 'rgba(239, 68, 68, 0.8)',
               borderRadius: 6,
             },
           ],
