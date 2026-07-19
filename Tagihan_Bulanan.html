@@ -107,13 +107,13 @@
       <div>
         <label class="text-sm">Jenis Tagihan</label>
         <select id="jenisTagihanManual" class="w-full border px-3 py-2 rounded bg-white">
-          <option value="spp">SPP / Bulanan</option>
           <option value="kegiatan">Kegiatan Khusus</option>
         </select>
+        <p class="text-xs text-gray-500 mt-1">SPP bulanan sudah otomatis tiap bulan.</p>
       </div>
       <div>
-        <label class="text-sm">Bulan Tagihan / Periode</label>
-        <input type="text" id="bulanTagihan" placeholder="Contoh: Juni 2025" class="w-full border px-3 py-2 rounded">
+        <label class="text-sm">Keterangan</label>
+        <input type="text" id="bulanTagihan" class="w-full border px-3 py-2 rounded">
       </div>
       <div>
         <label class="text-sm">Jumlah Tagihan</label>
@@ -163,17 +163,11 @@
 </main>
 </div>
 
-<script src="backend/js/integration.js?v=9" defer></script>
+<script src="backend/js/integration.js?v=10" defer></script>
 <script>
 function bukaModalTambahSiswa() {
   document.getElementById('modalTambahSiswa').classList.remove('hidden');
   document.getElementById('modalTambahSiswa').classList.add('flex');
-  // Prefill periode dengan bulan berjalan agar tagihan langsung tampil di tabel bulan ini
-  const inpBulan = document.getElementById('bulanTagihan');
-  if (inpBulan && !inpBulan.value) {
-    const now = new Date();
-    inpBulan.value = now.toLocaleDateString('id-ID', { month: 'long', year: 'numeric' });
-  }
 }
 function closeTambahModal() {
   document.getElementById('modalTambahSiswa').classList.add('hidden');

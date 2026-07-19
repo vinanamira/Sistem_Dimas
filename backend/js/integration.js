@@ -12,7 +12,7 @@
   const TAB_SESSION_ID = sessionStorage.getItem('tab_session_id');
 
   async function apiJson(url, options) {
-    const opts = Object.assign({ credentials: 'same-origin' }, options || {});
+    const opts = Object.assign({ credentials: 'same-origin', cache: 'no-store' }, options || {});
     opts.headers = opts.headers || {};
     opts.headers['X-Tab-Session-ID'] = TAB_SESSION_ID;
     const r = await fetch(BASE + url, opts);
@@ -765,9 +765,41 @@
     return total;
   }
 
+  // Total tagihan KESELURUHAN (nilai penuh/awal, sebelum dicicil) untuk tagihan yang masih aktif
+  function hitungTotalKeseluruhan(j, keg) {
+    const s = j.siswa || {};
+    const currentMonthStr = new Date().toLocaleDateString('id-ID', { month: 'long' });
+    const currentYearStr = new Date().getFullYear().toString();
+    const currentMonthNum = new Date().getMonth() + 1;
+
+    let total = 0;
+    if (s.tunggakan_list) {
+      s.tunggakan_list.forEach(function (t) {
+        if (t.periode_tagihan && t.periode_tagihan.toLowerCase().includes(currentMonthStr.toLowerCase()) && t.periode_tagihan.includes(currentYearStr)) {
+          total += Number(t.jumlah_tagihan_awal || t.jml_tunggakan || 0);
+        }
+      });
+    }
+    if (keg && keg.data) {
+      const kelasStr = (s.kelas) ? s.kelas.toUpperCase() : '';
+      const isKelasXI_XII = kelasStr.startsWith('XI') || kelasStr.startsWith('XII');
+      keg.data.forEach(function (row) {
+        if (row.status === 'lunas') return;
+        let isHidden = false;
+        if (isKelasXI_XII && currentMonthNum === 7 && (row.nama_kegiatan || '').toUpperCase().includes('DSP')) isHidden = true;
+        const isKegAkhirTahun = (row.nama_kegiatan || '').trim().toLowerCase() === 'kegiatan akhir tahun';
+        if (isKegAkhirTahun && (currentMonthNum < 1 || currentMonthNum > 4)) isHidden = true;
+        if (!isHidden) {
+          total += Number(row.jumlah || 0);
+        }
+      });
+    }
+    return total;
+  }
+
   function updateDashboardSiswa(j, cards, keg) {
     const s = j.siswa || {};
-    cards[0].textContent = formatRupiah(hitungTotalBulanIni(j, keg));
+    cards[0].textContent = formatRupiah(hitungTotalKeseluruhan(j, keg));
     cards[1].textContent = Number(s.jml_tunggakan) > 0 ? 'Belum Bayar' : 'Lunas';
     const jt = s.tgl_jatuh_tempo ? formatTanggalId(s.tgl_jatuh_tempo) : '-';
     cards[2].textContent = jt;
