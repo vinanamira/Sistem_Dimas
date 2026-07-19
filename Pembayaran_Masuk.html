@@ -122,7 +122,14 @@
 <div id="modalPembayaran"
   class="fixed inset-0 bg-black/40 hidden justify-center items-center z-50">
 
-  <div class="bg-white w-full max-w-lg p-6 rounded-xl shadow-xl">
+  <div class="bg-white w-full max-w-md p-5 rounded-xl shadow-xl max-h-[90vh] overflow-y-auto relative">
+
+    <button onclick="tutupModalPembayaran()"
+      class="absolute top-3 right-3 text-gray-400 hover:text-gray-600 transition">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+      </svg>
+    </button>
 
     <h3 class="text-lg font-bold mb-4">
       Input Pembayaran Masuk
@@ -140,6 +147,25 @@
       <div>
         <label class="text-sm">Kelas</label>
         <input type="text" id="kelasPembayaran"
+          class="w-full border px-3 py-2 rounded bg-gray-100" readonly>
+      </div>
+
+      <div>
+        <label class="text-sm">Pilih Tagihan</label>
+        <select id="tagihanPembayaran" class="w-full border px-3 py-2 rounded bg-white">
+          <option value="">- Pilih siswa dulu -</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="text-sm">Total Tagihan (semua)</label>
+        <input type="text" id="totalTagihanPembayaran"
+          class="w-full border px-3 py-2 rounded bg-gray-100" readonly>
+      </div>
+
+      <div>
+        <label class="text-sm">Sisa Tagihan (terpilih)</label>
+        <input type="text" id="sisaTagihanPembayaran"
           class="w-full border px-3 py-2 rounded bg-gray-100" readonly>
       </div>
 
@@ -277,6 +303,88 @@
 </div>
 <script>
 
+function _tabHeaders(){
+  const t = sessionStorage.getItem('tab_session_id');
+  return t ? { 'X-Tab-Session-ID': t } : {};
+}
+
+function _fmtRupiah(n){
+  const x = Number(n) || 0;
+  return 'Rp ' + x.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+}
+
+let tagihanSiswaCache = [];
+
+// Muat daftar tagihan (SPP + kegiatan) siswa terpilih — sama seperti tampilan siswa
+async function muatTagihanSiswa(){
+  const idSiswa  = document.getElementById('namaPembayaran').value;
+  const selTag   = document.getElementById('tagihanPembayaran');
+  const totalEl  = document.getElementById('totalTagihanPembayaran');
+  const sisaEl   = document.getElementById('sisaTagihanPembayaran');
+
+  selTag.innerHTML = '<option value="">- Memuat... -</option>';
+  totalEl.value = '';
+  sisaEl.value  = '';
+  tagihanSiswaCache = [];
+
+  if(!idSiswa){
+    selTag.innerHTML = '<option value="">- Pilih siswa dulu -</option>';
+    return;
+  }
+
+  try {
+    const res = await fetch('backend/data/get_tagihan_siswa.php?id_siswa=' + encodeURIComponent(idSiswa), {
+      credentials: 'same-origin',
+      headers: _tabHeaders(),
+    });
+    const data = await res.json();
+    if(!data.success){
+      selTag.innerHTML = '<option value="">- Gagal memuat -</option>';
+      return;
+    }
+
+    tagihanSiswaCache = data.tagihan || [];
+    totalEl.value = _fmtRupiah(data.total_tagihan || 0);
+
+    if(tagihanSiswaCache.length === 0){
+      selTag.innerHTML = '<option value="">- Tidak ada tagihan -</option>';
+      return;
+    }
+
+    selTag.innerHTML = '<option value="">- Pilih tagihan -</option>';
+    tagihanSiswaCache.forEach(function(t){
+      const opt = document.createElement('option');
+      opt.value = t.id;
+      opt.textContent = t.label + ' — ' + _fmtRupiah(t.sisa);
+      selTag.appendChild(opt);
+    });
+  } catch(e){
+    selTag.innerHTML = '<option value="">- Kesalahan jaringan -</option>';
+  }
+}
+
+// Saat tagihan dipilih: isi sisa tagihan + prefill nominal & keterangan
+function pilihTagihan(){
+  const val       = document.getElementById('tagihanPembayaran').value;
+  const sisaEl    = document.getElementById('sisaTagihanPembayaran');
+  const nominalEl = document.getElementById('nominalPembayaran');
+
+  const t = tagihanSiswaCache.find(function(x){ return x.id === val; });
+  if(!t){
+    sisaEl.value = '';
+    return;
+  }
+  sisaEl.value    = _fmtRupiah(t.sisa);
+  nominalEl.value = new Intl.NumberFormat('id-ID').format(Math.round(t.sisa));
+}
+
+document.addEventListener('DOMContentLoaded', function(){
+  const selSiswa = document.getElementById('namaPembayaran');
+  if(selSiswa) selSiswa.addEventListener('change', muatTagihanSiswa);
+  const selTag = document.getElementById('tagihanPembayaran');
+  if(selTag) selTag.addEventListener('change', pilihTagihan);
+});
+
 function bukaModalPembayaran(){
   document.getElementById('modalPembayaran')
     .classList.remove('hidden');
@@ -295,19 +403,20 @@ function tutupModalPembayaran(){
 
 async function simpanPembayaranManual(){
 
-  const selSiswa =
-    document.getElementById('namaPembayaran');
-
-  const id_siswa = selSiswa ? selSiswa.value : '';
+  const id_siswa =
+    document.getElementById('namaPembayaran').value;
 
   const tanggal =
     document.getElementById('tanggalPembayaran').value;
 
   const nominal =
-    document.getElementById('nominalPembayaran').value.replace(/\./g, '');
+    document.getElementById('nominalPembayaran').value.replace(/[^0-9]/g, '');
 
   const keterangan =
     document.getElementById('keteranganPembayaran').value;
+
+  const tagihanVal =
+    document.getElementById('tagihanPembayaran').value;
 
   if(!id_siswa || !tanggal || !nominal){
     alert('Lengkapi data pembayaran');
@@ -318,20 +427,29 @@ async function simpanPembayaranManual(){
   fd.append('id_siswa', id_siswa);
   fd.append('jml_bayar', nominal);
   fd.append('tgl_transaksi', tanggal);
-  fd.append('keterangan', keterangan || 'Pembayaran Masuk');
+  fd.append('keterangan', keterangan);
+
+  // Arahkan ke jenis tagihan terpilih (SPP / kegiatan)
+  if (tagihanVal.startsWith('kegiatan_')) {
+    fd.append('id_tagihan_keg', tagihanVal.replace('kegiatan_', ''));
+  } else if (tagihanVal.startsWith('spp_')) {
+    fd.append('id_tunggakan', tagihanVal.replace('spp_', ''));
+  }
 
   try {
     const r = await fetch('backend/proses/transaksi/simpan_transaksi.php', {
       method: 'POST',
       body: fd,
       credentials: 'same-origin',
+      headers: _tabHeaders(),
     });
-    if (r.ok) {
+    const data = await r.json().catch(() => null);
+    if (r.ok && data && data.success) {
       alert('Pembayaran berhasil ditambahkan');
       tutupModalPembayaran();
       window.location.reload();
     } else {
-      alert('Gagal menyimpan pembayaran');
+      alert((data && data.error) ? data.error : 'Gagal menyimpan pembayaran');
     }
   } catch (e) {
     alert('Terjadi kesalahan jaringan');

@@ -182,7 +182,7 @@
       document.getElementById('editTanggal').value = (item.tgl_uang || '').slice(0, 10);
       document.getElementById('editKategori').value = item.kategori || 'Lainnya';
       document.getElementById('editKeterangan').value = item.ket_uang || '';
-      document.getElementById('editJumlah').value = item.jml_uang;
+      document.getElementById('editJumlah').value = new Intl.NumberFormat('id-ID').format(Number(item.jml_uang) || 0);
       document.getElementById('modalEdit').classList.remove('hidden');
       document.getElementById('modalEdit').classList.add('flex');
     }
@@ -208,7 +208,7 @@
       const fd = new FormData();
       fd.append('tgl_uang', document.getElementById('tanggal').value);
       fd.append('ket_uang', document.getElementById('keterangan').value);
-      fd.append('jml_uang', document.getElementById('jumlah').value);
+      fd.append('jml_uang', parseRupiah(document.getElementById('jumlah').value));
       fd.append('jenis_uang', 'pengeluaran');
       fd.append('kategori', document.getElementById('kategori').value);
       const r = await fetch(BASE + 'backend/proses/keuangan/tambah_keuangan.php', {
@@ -228,7 +228,7 @@
       fd.append('id_uang', selectedId);
       fd.append('tgl_uang', document.getElementById('editTanggal').value);
       fd.append('ket_uang', document.getElementById('editKeterangan').value);
-      fd.append('jml_uang', document.getElementById('editJumlah').value);
+      fd.append('jml_uang', parseRupiah(document.getElementById('editJumlah').value));
       fd.append('jenis_uang', 'pengeluaran');
       fd.append('kategori', document.getElementById('editKategori').value);
       const r = await fetch(BASE + 'backend/proses/keuangan/edit_keuangan.php', {
