@@ -27,16 +27,20 @@ if (!$row) {
 $id_siswa = (int) $row['id_siswa'];
 
 $q = $db->prepare(
-    'SELECT id_tagihan_keg, nama_kegiatan, kelas_label, jumlah, sisa_tagihan, status, tgl_bayar, id_transaksi
-     FROM tagihan_kegiatan
-     WHERE id_siswa = ?
-     ORDER BY id_tagihan_keg ASC'
+    "SELECT tk.id_tagihan_keg, tk.nama_kegiatan, tk.kelas_label, tk.jumlah, tk.sisa_tagihan,
+            tk.status, tk.tgl_bayar, tk.id_transaksi,
+            (SELECT COUNT(*) FROM pembayaran_pending pp
+             WHERE pp.id_tagihan_keg = tk.id_tagihan_keg AND pp.status = 'pending') AS pending
+     FROM tagihan_kegiatan tk
+     WHERE tk.id_siswa = ?
+     ORDER BY tk.id_tagihan_keg ASC"
 );
 $q->bind_param('i', $id_siswa);
 $q->execute();
 $result = $q->get_result();
 $data   = [];
 while ($r = $result->fetch_assoc()) {
+    $r['pending'] = (int) $r['pending'] > 0;
     $data[] = $r;
 }
 $q->close();

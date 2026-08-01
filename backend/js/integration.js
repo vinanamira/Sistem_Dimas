@@ -11,6 +11,49 @@
   }
   const TAB_SESSION_ID = sessionStorage.getItem('tab_session_id');
 
+  /* ---------- UI: modal konfirmasi & toast (ganti confirm/alert bawaan) ---------- */
+  function uiConfirm(message, opts) {
+    opts = opts || {};
+    const title   = opts.title   || 'Konfirmasi';
+    const okText  = opts.okText  || 'Ya';
+    const noText  = opts.noText  || 'Batal';
+    const danger  = !!opts.danger;
+    const okColor = danger ? 'bg-red-500 hover:bg-red-600' : 'bg-green-600 hover:bg-green-700';
+
+    return new Promise(function (resolve) {
+      const overlay = document.createElement('div');
+      overlay.className = 'fixed inset-0 bg-black/40 flex items-center justify-center z-[100] p-4';
+      overlay.innerHTML =
+        '<div class="bg-white w-full max-w-sm rounded-xl shadow-xl p-6 text-center">' +
+          '<h3 class="text-lg font-bold text-gray-800 mb-2">' + title + '</h3>' +
+          '<p class="text-sm text-gray-600 mb-6">' + message + '</p>' +
+          '<div class="flex justify-center gap-3">' +
+            '<button data-act="no" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg text-sm">' + noText + '</button>' +
+            '<button data-act="ok" class="px-4 py-2 ' + okColor + ' text-white rounded-lg text-sm">' + okText + '</button>' +
+          '</div>' +
+        '</div>';
+      document.body.appendChild(overlay);
+
+      function done(val) { overlay.remove(); resolve(val); }
+      overlay.querySelector('[data-act="ok"]').onclick = function () { done(true); };
+      overlay.querySelector('[data-act="no"]').onclick = function () { done(false); };
+      overlay.addEventListener('click', function (e) { if (e.target === overlay) done(false); });
+    });
+  }
+
+  function uiToast(message, type) {
+    const bg = type === 'error' ? 'bg-red-500' : 'bg-green-600';
+    const el = document.createElement('div');
+    el.className = 'fixed top-5 right-5 z-[110] ' + bg + ' text-white text-sm px-4 py-3 rounded-lg shadow-lg transition-opacity duration-300';
+    el.textContent = message;
+    document.body.appendChild(el);
+    setTimeout(function () { el.style.opacity = '0'; }, 2200);
+    setTimeout(function () { el.remove(); }, 2600);
+  }
+
+  window.uiConfirm = uiConfirm;
+  window.uiToast = uiToast;
+
   async function apiJson(url, options) {
     const opts = Object.assign({ credentials: 'same-origin', cache: 'no-store' }, options || {});
     opts.headers = opts.headers || {};
@@ -1187,9 +1230,98 @@
     });
   }
 
+  /* ---------- Pembayaran pending (menunggu approve bendahara) ---------- */
+  async function renderPendingPembayaran() {
+    const tbody = document.getElementById('tabelPending');
+    if (!tbody) return;
+
+    const j = await apiJson('backend/data/get_pending_pembayaran.php');
+    const rows = (j && j.success) ? (j.data || []) : [];
+
+    const badge = document.getElementById('badgePending');
+    if (badge) {
+      badge.textContent = String(rows.length);
+      badge.classList.toggle('hidden', rows.length === 0);
+    }
+
+    tbody.innerHTML = '';
+    if (rows.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-4 text-center text-gray-400">Tidak ada pembayaran menunggu persetujuan</td></tr>';
+      return;
+    }
+
+    rows.forEach(function (r) {
+      const jenisLabel = r.jenis === 'kegiatan' ? 'Kegiatan' : 'SPP';
+      const buktiCell = Number(r.has_bukti)
+        ? '<button onclick="bukaModalBukti(\'' + BASE + 'backend/data/get_bukti.php?sumber=pending&id=' + r.id_pending + '\')" class="text-blue-500 underline hover:text-blue-700">Lihat</button>'
+        : '-';
+      const tr = document.createElement('tr');
+      tr.innerHTML =
+        '<td class="px-3 py-4">' + (r.nama_siswa || '') + '</td>' +
+        '<td class="px-3 py-4">' + (r.kelas || '') + '</td>' +
+        '<td class="px-3 py-4 whitespace-nowrap">' + formatTanggalId(r.tgl_transaksi) + '</td>' +
+        '<td class="px-3 py-4 whitespace-nowrap">' + formatRupiah(r.jml_bayar) + '</td>' +
+        '<td class="px-3 py-4">' +
+          '<span class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded mr-1">' + jenisLabel + '</span>' +
+          (r.keterangan || '') + '</td>' +
+        '<td class="px-3 py-4">' + buktiCell + '</td>' +
+        '<td class="px-3 py-4 space-x-1 whitespace-nowrap">' +
+          '<button class="bg-green-600 hover:bg-green-700 text-white px-2 py-1 rounded text-xs btn-setujui">Setujui</button>' +
+          '<button class="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-xs btn-tolak">Tolak</button>' +
+        '</td>';
+      tr.querySelector('.btn-setujui').onclick = function () { window.setujuiPembayaran(r.id_pending, r.nama_siswa); };
+      tr.querySelector('.btn-tolak').onclick = function () { window.tolakPembayaran(r.id_pending, r.nama_siswa); };
+      tbody.appendChild(tr);
+    });
+  }
+
+  async function prosesPembayaranPending(id_pending, aksi, catatan) {
+    const fd = new FormData();
+    fd.append('id_pending', id_pending);
+    fd.append('aksi', aksi);
+    if (catatan) fd.append('catatan', catatan);
+    const r = await fetch(BASE + 'backend/proses/transaksi/approve_pembayaran.php', {
+      method: 'POST',
+      body: fd,
+      credentials: 'same-origin',
+      headers: { 'X-Tab-Session-ID': TAB_SESSION_ID },
+    });
+    return await r.json().catch(function () { return null; });
+  }
+
+  window.setujuiPembayaran = async function (id_pending, nama) {
+    const ok = await uiConfirm('Setujui pembayaran dari <b>' + (nama || 'siswa') + '</b>? Tunggakan akan berkurang.', {
+      title: 'Setujui Pembayaran', okText: 'Setujui',
+    });
+    if (!ok) return;
+    const data = await prosesPembayaranPending(id_pending, 'setujui', '');
+    if (data && data.success) {
+      uiToast(data.message || 'Pembayaran disetujui');
+      setTimeout(function () { window.location.reload(); }, 900);
+    } else {
+      uiToast((data && data.error) ? data.error : 'Gagal menyetujui pembayaran', 'error');
+    }
+  };
+
+  window.tolakPembayaran = async function (id_pending, nama) {
+    const ok = await uiConfirm('Tolak pembayaran dari <b>' + (nama || 'siswa') + '</b>?', {
+      title: 'Tolak Pembayaran', okText: 'Tolak', danger: true,
+    });
+    if (!ok) return;
+    const data = await prosesPembayaranPending(id_pending, 'tolak', '');
+    if (data && data.success) {
+      uiToast(data.message || 'Pembayaran ditolak');
+      setTimeout(function () { window.location.reload(); }, 900);
+    } else {
+      uiToast((data && data.error) ? data.error : 'Gagal menolak pembayaran', 'error');
+    }
+  };
+
   /* ---------- Pembayaran masuk ---------- */
   async function initPembayaranMasuk() {
-    const tb = document.querySelector('main table tbody');
+    await renderPendingPembayaran();
+
+    const tb = document.getElementById('tabelTransaksi') || document.querySelector('main table tbody');
     if (!tb) return;
 
     const j = await apiJson('backend/data/get_transaksi.php');
@@ -1515,7 +1647,12 @@
           opt.value = 'spp_' + t.id_tunggakan;
           let label = t.periode_tagihan || '';
           if (!label.toLowerCase().startsWith('spp')) label = 'SPP ' + label;
-          opt.textContent = label;
+          if (t.pending) {
+            opt.textContent = label + ' (Menunggu Verifikasi)';
+            opt.disabled = true;
+          } else {
+            opt.textContent = label;
+          }
           opt.dataset.sisa = t.jml_tunggakan;
           opt.dataset.total = t.jumlah_tagihan_awal || t.jml_tunggakan;
           sel.appendChild(opt);
@@ -1543,7 +1680,12 @@
           if (!isHidden) {
             const opt = document.createElement('option');
             opt.value = 'kegiatan_' + k.id_tagihan_keg;
-            opt.textContent = 'Kegiatan ' + (k.nama_kegiatan || '');
+            if (k.pending) {
+              opt.textContent = 'Kegiatan ' + (k.nama_kegiatan || '') + ' (Menunggu Verifikasi)';
+              opt.disabled = true;
+            } else {
+              opt.textContent = 'Kegiatan ' + (k.nama_kegiatan || '');
+            }
             const sisa = k.sisa_tagihan !== undefined && k.sisa_tagihan !== null ? k.sisa_tagihan : k.jumlah;
             opt.dataset.sisa = sisa;
             opt.dataset.total = k.jumlah;
@@ -1623,7 +1765,9 @@
 
       const elStatus = document.getElementById('tagihanStatusValue');
       if (elStatus) {
-        if (Number(s.jml_tunggakan) > 0) {
+        if (j.ada_pending) {
+          elStatus.innerHTML = '<span class="text-blue-600">Menunggu Verifikasi Bendahara</span>';
+        } else if (Number(s.jml_tunggakan) > 0) {
           elStatus.innerHTML = '<span class="text-red-500">Belum Bayar</span>';
         } else {
           elStatus.innerHTML = '<span class="text-green-500">Lunas</span>';
@@ -1685,6 +1829,8 @@
           let statBadge = '';
           if (lunas) {
             statBadge = '<span class="bg-green-100 text-green-600 px-2 py-1 rounded text-xs font-semibold">Lunas</span>';
+          } else if (row.pending) {
+            statBadge = '<span class="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-semibold">Menunggu Verifikasi</span>';
           } else if (cicilan) {
             statBadge = '<span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded text-xs font-semibold">Cicilan</span>';
           } else {

@@ -1,10 +1,11 @@
 <?php
 /**
- * Siswa konfirmasi transfer SPP → catat transaksi (tampil di Pembayaran Masuk admin).
+ * Siswa konfirmasi transfer SPP → simpan sebagai pembayaran PENDING.
+ * Tunggakan TIDAK langsung berkurang; menunggu bendahara memverifikasi
+ * bukti transfer (lihat backend/proses/transaksi/approve_pembayaran.php).
  */
 require_once '../../config/database.php';
 require_once '../../helpers/session.php';
-require_once '../../helpers/transaksi_helper.php';
 require_once '../../helpers/upload_helper.php';
 requireRole('siswa');
 
@@ -19,7 +20,7 @@ $tgl          = trim($_POST['tgl_transaksi'] ?? date('Y-m-d'));
 $user = getLoggedUser();
 $db   = getDB();
 
-$stmt = $db->prepare('SELECT id_siswa FROM siswa WHERE id_user = ?');
+$stmt = $db->prepare('SELECT id_siswa, nama_siswa FROM siswa WHERE id_user = ?');
 $stmt->bind_param('i', $user['id_user']);
 $stmt->execute();
 $res = $stmt->get_result();
@@ -30,7 +31,8 @@ if (!$srow) {
     $db->close();
     jsonResponse(false, 'Profil tidak ditemukan', [], 404);
 }
-$id_siswa = (int) $srow['id_siswa'];
+$id_siswa   = (int) $srow['id_siswa'];
+$nama_siswa = $srow['nama_siswa'];
 
 if (!$id_tunggakan) {
     $st2 = $db->prepare('SELECT id_tunggakan, jml_tunggakan FROM tunggakan WHERE id_siswa = ? LIMIT 1');
@@ -69,24 +71,45 @@ if ($jml_input > $jml_max) {
 
 $jml_bayar = $jml_input > 0 ? $jml_input : $jml_max;
 
-$buktiData = null;
-$buktiMime = null;
-if (isset($_FILES['bukti_transfer']) && $_FILES['bukti_transfer']['error'] !== UPLOAD_ERR_NO_FILE) {
-    try {
-        $bukti     = readBuktiUpload($_FILES['bukti_transfer']);
-        $buktiData = $bukti['data'];
-        $buktiMime = $bukti['mime'];
-    } catch (Exception $e) {
-        $db->close();
-        jsonResponse(false, $e->getMessage(), [], 400);
-    }
+// Cegah pengajuan ganda untuk tagihan yang sama selama masih menunggu verifikasi
+$cek = $db->prepare("SELECT id_pending FROM pembayaran_pending WHERE id_tunggakan = ? AND status = 'pending' LIMIT 1");
+$cek->bind_param('i', $id_tunggakan);
+$cek->execute();
+$adaPending = $cek->get_result()->fetch_assoc();
+$cek->close();
+if ($adaPending) {
+    $db->close();
+    jsonResponse(false, 'Masih ada pembayaran yang menunggu verifikasi bendahara untuk tagihan ini', [], 409);
 }
 
+// Bukti transfer wajib supaya bendahara bisa memverifikasi
+if (!isset($_FILES['bukti_transfer']) || $_FILES['bukti_transfer']['error'] === UPLOAD_ERR_NO_FILE) {
+    $db->close();
+    jsonResponse(false, 'Bukti transfer wajib diunggah', [], 400);
+}
 try {
-    simpanTransaksiPembayaran($db, $id_siswa, $id_tunggakan, $jml_bayar, $tgl, 'Pembayaran SPP', 'spp', $buktiData, $buktiMime);
-} catch (Throwable $e) {
+    $bukti     = readBuktiUpload($_FILES['bukti_transfer']);
+    $buktiData = $bukti['data'];
+    $buktiMime = $bukti['mime'];
+} catch (Exception $e) {
     $db->close();
     jsonResponse(false, $e->getMessage(), [], 400);
 }
+
+$keterangan = 'Pembayaran SPP';
+$stmt = $db->prepare(
+    "INSERT INTO pembayaran_pending
+       (id_siswa, nama_siswa, jenis, id_tunggakan, jml_bayar, tgl_transaksi, keterangan, bukti_blob, bukti_mime)
+     VALUES (?, ?, 'spp', ?, ?, ?, ?, ?, ?)"
+);
+$stmt->bind_param('isidssss', $id_siswa, $nama_siswa, $id_tunggakan, $jml_bayar, $tgl, $keterangan, $buktiData, $buktiMime);
+try {
+    $stmt->execute();
+} catch (Throwable $e) {
+    $stmt->close();
+    $db->close();
+    jsonResponse(false, 'Gagal menyimpan pembayaran', [], 500);
+}
+$stmt->close();
 $db->close();
-jsonResponse(true, 'Pembayaran SPP berhasil dikonfirmasi');
+jsonResponse(true, 'Pembayaran dikirim & menunggu verifikasi bendahara');

@@ -18,15 +18,31 @@ $id_siswa = (int) ($sis['id_siswa'] ?? 0);
 $total_tunggakan = 0.0;
 $tunggakan_list = [];
 
+$pending_tunggakan = [];
+$ada_pending = false;
 if ($id_siswa) {
     require_once '../helpers/auto_spp.php';
     autoGenerateSPP($db, $id_siswa, $sis['nama_siswa'], $sis['kelas']);
+
+    // Set id_tunggakan yang punya pembayaran menunggu verifikasi
+    $qp = $db->prepare("SELECT id_tunggakan FROM pembayaran_pending WHERE id_siswa = ? AND jenis = 'spp' AND status = 'pending' AND id_tunggakan IS NOT NULL");
+    $qp->bind_param('i', $id_siswa);
+    $qp->execute();
+    $rp = $qp->get_result();
+    while ($rowP = $rp->fetch_assoc()) {
+        $pending_tunggakan[(int) $rowP['id_tunggakan']] = true;
+    }
+    $qp->close();
 
     $qt = $db->prepare('SELECT id_tunggakan, jml_tunggakan, jumlah_tagihan_awal, periode_tagihan, tgl_jatuh_tempo FROM tunggakan WHERE id_siswa = ? AND jml_tunggakan > 0 ORDER BY tgl_jatuh_tempo ASC');
     $qt->bind_param('i', $id_siswa);
     $qt->execute();
     $rt = $qt->get_result();
     while ($row = $rt->fetch_assoc()) {
+        $row['pending'] = isset($pending_tunggakan[(int) $row['id_tunggakan']]);
+        if ($row['pending']) {
+            $ada_pending = true;
+        }
         $tunggakan_list[] = $row;
         $total_tunggakan += (float) $row['jml_tunggakan'];
     }
@@ -103,6 +119,7 @@ $db->close();
 echo json_encode([
     'success'       => true,
     'siswa'         => $sis,
+    'ada_pending'   => $ada_pending,
     'total_tagihan' => $total,
     'sisa_tunggakan'=> $sisa,
     'total_bayar'   => $total_bayar,
